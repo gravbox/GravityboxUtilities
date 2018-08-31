@@ -765,5 +765,19 @@ namespace Gravitybox.CommonUtilities
             return date.ToString("MMM dd, yyyy HH:mm:ss");
         }
 
+        public static bool IsValidUrlName(string name)
+        {
+            if (String.IsNullOrEmpty(name))
+                return false;
+
+            var isValid = true;
+            foreach (var ch in name)
+            {
+                isValid = (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9');
+                if (!isValid) break;
+            }
+            return isValid;
+        }
+
     }
 }

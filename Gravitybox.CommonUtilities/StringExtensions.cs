@@ -306,5 +306,23 @@ namespace Gravitybox.CommonUtilities
             }
         }
 
+        /// <summary>
+        /// Strip to only numeric chars
+        /// </summary>
+        public static string StripToNumeric(this string str)
+        {
+            if (string.IsNullOrEmpty(str)) return str;
+            return new string(str.ToCharArray().Where(x => char.IsNumber(x)).ToArray());
+        }
+
+        /// <summary>
+        /// Remove all numeric chars
+        /// </summary>
+        public static string StripAllNumeric(this string str)
+        {
+            if (string.IsNullOrEmpty(str)) return str;
+            return new string(str.ToCharArray().Where(x => !char.IsNumber(x)).ToArray());
+        }
+
     }
 }

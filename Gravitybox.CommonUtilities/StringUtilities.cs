@@ -718,6 +718,13 @@ namespace Gravitybox.CommonUtilities
             return r;
         }
 
+        public static long ToInt64(this string v)
+        {
+            if (v == null) return 0;
+            long.TryParse(v, out long r);
+            return r;
+        }
+
         /// <summary />
         public static double ToDouble(this string v)
         {

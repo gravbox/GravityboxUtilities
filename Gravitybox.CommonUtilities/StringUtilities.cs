@@ -725,6 +725,24 @@ namespace Gravitybox.CommonUtilities
             return r;
         }
 
+        public static Guid ToGuid(this string v)
+        {
+            if (v == null) return Guid.Empty;
+            if (v.Length == 32)
+            {
+                //There are no slashes so add them
+                // xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+                v = v.Substring(0, 8) + "-" +
+                    v.Substring(8, 4) + "-" +
+                    v.Substring(12, 4) + "-" +
+                    v.Substring(16, 4) + "-" +
+                    v.Substring(20, 12);
+            }
+
+            Guid.TryParse(v, out Guid r);
+            return r;
+        }
+
         /// <summary />
         public static double ToDouble(this string v)
         {

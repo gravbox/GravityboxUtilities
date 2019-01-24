@@ -68,13 +68,25 @@ namespace Gravitybox.CommonUtilities
         /// </summary>
         /// <param name="inString">The string to encrypt</param>
         /// <param name="key">The key to use for encryption</param>
-        public static string Encrypt(string inString, string key = defaultKey)
+        public static string Encrypt(string inString, string key = defaultKey, string iv = encryptionIV)
         {
+            if (string.IsNullOrEmpty(key))
+                throw new Exception("Invalid key");
+            if (string.IsNullOrEmpty(iv))
+                throw new Exception("Invalid iv");
+
+            var kArr = Encoding.Unicode.GetBytes(key);
+            if (kArr.Length != 32)
+                throw new Exception("Invalid key");
+            var ivArr = Encoding.Unicode.GetBytes(iv);
+            if (ivArr.Length != 16)
+                throw new Exception("Invalid iv");
+
             try
             {
                 var aesCSP = new AesCryptoServiceProvider();
-                aesCSP.Key = Encoding.Unicode.GetBytes(key);
-                aesCSP.IV = Encoding.Unicode.GetBytes(encryptionIV);
+                aesCSP.Key = kArr;
+                aesCSP.IV = ivArr;
                 var encString = EncryptString(aesCSP, inString);
                 //return Convert.ToBase64String(encString);
                 return ToHexString(encString);
@@ -90,13 +102,25 @@ namespace Gravitybox.CommonUtilities
         /// </summary>
         /// <param name="inString">The string to decrypt</param>
         /// <param name="key">The key to use for decryption</param>
-        public static string Decrypt(string inString, string key = defaultKey)
+        public static string Decrypt(string inString, string key = defaultKey, string iv = encryptionIV)
         {
+            if (string.IsNullOrEmpty(key))
+                throw new Exception("Invalid key");
+            if (string.IsNullOrEmpty(iv))
+                throw new Exception("Invalid iv");
+
+            var kArr = Encoding.Unicode.GetBytes(key);
+            if (kArr.Length != 32)
+                throw new Exception("Invalid key");
+            var ivArr = Encoding.Unicode.GetBytes(iv);
+            if (ivArr.Length != 16)
+                throw new Exception("Invalid iv");
+
             try
             {
                 var aesCSP = new AesCryptoServiceProvider();
                 aesCSP.Key = Encoding.Unicode.GetBytes(key);
-                aesCSP.IV = Encoding.Unicode.GetBytes(encryptionIV);
+                aesCSP.IV = Encoding.Unicode.GetBytes(iv);
                 //var encBytes = Convert.FromBase64String(inString);
                 var encBytes = FromHexStringToBytes(inString);
                 return DecryptString(aesCSP, encBytes);

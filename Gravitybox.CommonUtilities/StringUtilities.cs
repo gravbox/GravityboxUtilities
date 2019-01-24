@@ -796,5 +796,122 @@ namespace Gravitybox.CommonUtilities
             return isValid;
         }
 
+        public static byte[] ZipBytes(this byte[] byteArray)
+        {
+            try
+            {
+                //Prepare for compress
+                using (var ms = new System.IO.MemoryStream())
+                {
+                    using (var sw = new System.IO.Compression.GZipStream(ms, System.IO.Compression.CompressionMode.Compress))
+                    {
+                        //Compress
+                        sw.Write(byteArray, 0, byteArray.Length);
+                    }
+                    //Transform byte[] zip data to string
+                    return ms.ToArray();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public static string Unzip(this byte[] byteArray)
+        {
+            //If null stream return null string
+            if (byteArray == null)
+                return null;
+
+            //If NOT compressed then return string, no de-compression
+            if (byteArray.Length > 3 && (byteArray[0] == 31 && byteArray[1] == 139 && byteArray[2] == 8))
+            {
+                //Compressed
+            }
+            else
+            {
+                var xml = System.Text.Encoding.Unicode.GetString(byteArray);
+                if (xml == "")
+                {
+                    // Treat this just like a null - deserializer can't handle ""
+                    return null;
+                }
+                else
+                {
+                    // Check for byte order mark
+                    if (xml.StartsWith("<") || xml[0] == 0xfeff)
+                    {
+                        xml = System.Text.RegularExpressions.Regex.Replace(xml, @"[^\u0000-\u007F]", string.Empty);
+                        return xml;
+                    }
+                    else
+                    {
+                        return System.Text.Encoding.UTF8.GetString(byteArray);
+                    }
+                }
+            }
+            return System.Text.Encoding.UTF8.GetString(byteArray.UnzipBytes());
+        }
+
+        public static byte[] UnzipBytes(this byte[] byteArray)
+        {
+            //If null stream return null string
+            if (byteArray == null)
+                return null;
+
+            try
+            {
+                using (var memoryStream = new MemoryStream(byteArray))
+                {
+                    using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+                    {
+                        using (var writerStream = new MemoryStream())
+                        {
+                            gZipStream.CopyTo(writerStream);
+                            gZipStream.Dispose();
+                            memoryStream.Dispose();
+                            return writerStream.ToArray();
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        /// <summary />
+        public static byte[] ZipString(this string value)
+        {
+            if (string.IsNullOrEmpty(value)) return null;
+            var byteArray = System.Text.Encoding.UTF8.GetBytes(value);
+            return byteArray.ZipBytes();
+        }
+
+        /// <summary>
+        /// Determines if the specified email address is valid
+        /// </summary>
+        public static bool IsValidEmailAddress(string email)
+        {
+            //string MatchEmailPattern = @"[A-Za-z0-9_%+-]+@[A-Za-z0-9-]+\.[A-Za-z]{2,10}";
+            var MatchEmailPattern = @"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
+
+            var validEnding = new string[] { ".com", ".edu", ".org", ".int", ".gov", ".mil", ".net", ".biz", ".info" };
+
+            if (email == null) return false;
+            if (email.Contains(" ")) return false;
+            if (email.Count(x => x == '@') != 1) return false;
+            var b = Regex.IsMatch(email, MatchEmailPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+            //If a country postfix like ".ca" then just ignore
+            var checkEnding = email.Split(new char[] { '.' }).Last().Length >= 3;
+            if (checkEnding)
+                return b && validEnding.Any(x => email.EndsWith(x, StringComparison.InvariantCultureIgnoreCase));
+            else
+                return b;
+        }
+
     }
 }

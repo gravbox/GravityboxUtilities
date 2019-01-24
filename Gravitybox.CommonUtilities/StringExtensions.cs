@@ -34,6 +34,12 @@ namespace Gravitybox.CommonUtilities
             return serializer.Serialize(obj);
         }
 
+        public static T FromJson<T>(this string str)
+        {
+            var serializer = new JavaScriptSerializer();
+            return serializer.Deserialize<T>(str);
+        }
+
         public static bool IsNumber(this string v)
         {
             decimal d;
